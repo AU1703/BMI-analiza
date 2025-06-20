@@ -1,0 +1,137 @@
+#include <cs50.h>
+#include <math.h>
+#include <stdio.h>
+
+float oblicz_bf(char sex, int weight, int height, int neck, int waist, int hip);
+void raport(char sex, int weight, int height, float wynik);
+
+int main(void)
+{
+
+    char sex;
+    int weight, height, neck, waist, hip;
+    float wynik = -1;
+
+    // pytania
+
+    do
+    {
+        sex = get_char("Podaj swoją płeć M/K: ");
+        weight = get_int("Podaj swoją wagę w kilogramach: ");
+        height = get_int("Podaj swój wzrost w centymetrach: ");
+        neck = get_int("Podaj swój obwód szyi w centymetrach: ");
+        waist = get_int("Podaj swój obwód talii w centymetrach: ");
+
+        // dodatkowe pytanie dla kobiet
+
+        hip = 0;
+
+        if (sex == 'K' || sex == 'k')
+        {
+            hip = get_int("Podaj obwód biodra w centymetrach: ");
+        }
+
+        // wezwanie funckji
+
+        wynik = oblicz_bf(sex, weight, height, neck, waist, hip);
+
+        if (wynik == -1)
+
+        {
+            printf("❌ Błąd, nieprawidłowe dane wejściowe lub płeć, spróbuj jeszcze raz.\n");
+        }
+    }
+    while (wynik == -1);
+
+    raport(sex, weight, height, wynik);
+    return 0;
+
+    // komentarze
+}
+
+float oblicz_bf(char sex, int weight, int height, int neck, int waist, int hip)
+{
+
+    // zabezpieczenie przed bledami
+    if (sex == 'M' || sex == 'm')
+    {
+        if ((waist - neck) <= 0 || height <= 0)
+        {
+            return -1;
+        }
+    }
+
+    if (sex == 'K' || sex == 'k')
+    {
+        if ((waist + hip - neck) <= 0 || height <= 0)
+        {
+            return -1;
+        }
+    }
+
+    if (weight <= 30 || weight > 300 || height <= 100 || height > 250 || neck <= 20 || neck > 70 ||
+        waist <= 40 || waist > 200 || (sex == 'K' && (hip <= 50 || hip > 200)))
+    {
+        return -1;
+    }
+
+    // funkcja
+
+    float wynik = -1;
+
+    if (sex == 'M' || sex == 'm')
+    {
+        wynik = 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450;
+    }
+
+    else if (sex == 'K' || sex == 'k')
+    {
+        wynik =
+            495 / (1.29579 - 0.35004 * log10(waist + hip - neck) + 0.22100 * log10(height)) - 450;
+    }
+
+    if (wynik < 0 || wynik > 70)
+{
+    return -1;
+}
+
+    return wynik;
+}
+
+void raport(char sex, int weight, int height, float wynik)
+{
+    printf("\n==== RAPORT ====\n");
+    printf("Wzrost: %i cm\n", height);
+    printf("Waga: %i kg\n", weight);
+    printf("Poziom tkanki tłuszczowej: %.2f%%\n", wynik);
+    printf("Komentarz: ");
+
+    if (sex == 'M' || sex == 'm')
+    {
+        if (wynik < 6)
+            printf("Bardzo niski poziom tkanki tłuszczowej.\n");
+        else if (wynik <= 13)
+            printf("Atletyczny poziom.\n");
+        else if (wynik <= 17)
+            printf("Dobra forma.\n");
+        else if (wynik <= 24)
+            printf("Przeciętny poziom.\n");
+        else
+            printf("Nadmiar tkanki tłuszczowej.\n");
+    }
+    else if (sex == 'K' || sex == 'k')
+    {
+        if (wynik < 14)
+            printf("Bardzo niski poziom tkanki tłuszczowej.\n");
+        else if (wynik <= 20)
+            printf("Atletyczny poziom.\n");
+        else if (wynik <= 24)
+            printf("Dobra forma.\n");
+        else if (wynik <= 31)
+            printf("Przeciętny poziom.\n");
+        else
+            printf("Nadmiar tkanki tłuszczowej.\n");
+    }
+
+    printf("========================\n");
+}
